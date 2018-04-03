@@ -1,3 +1,5 @@
+exports.handler = (event, context, callback) => {
+    // TODO implement
     var response='Hello';
     console.log(event)
     switch (event.data) {
