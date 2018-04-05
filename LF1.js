@@ -68,7 +68,7 @@ function buildValidationResult(isValid, violatedSlot, messageContent) {
     };
 }
 
-function validateRestaurantSuggest(location, cuisine, peopleNum, date, time, phone) {
+function validateRestaurantSuggest(location, cuisine, peopleNum, date, time, email) {
 
     if (date) {
         if (!isValidDate(date)) {
@@ -123,14 +123,14 @@ function restaurantSuggest(intentRequest, callback) {
     const peopleNum = intentRequest.currentIntent.slots.PeopleNum;
     const date = intentRequest.currentIntent.slots.Date;
     const time = intentRequest.currentIntent.slots.Time;
-    const phone = intentRequest.currentIntent.slots.Phone;
+    const email = intentRequest.currentIntent.slots.Email;
 
     const source = intentRequest.invocationSource;
 
     if (source === 'DialogCodeHook') {
         // Perform basic validation on the supplied input slots.  Use the elicitSlot dialog action to re-prompt for the first violation detected.
         const slots = intentRequest.currentIntent.slots;
-        const validationResult = validateRestaurantSuggest(location, cuisine, peopleNum, date, time, phone);
+        const validationResult = validateRestaurantSuggest(location, cuisine, peopleNum, date, time, email);
         if (!validationResult.isValid) {
             slots[`${validationResult.violatedSlot}`] = null;
             callback(null, elicitSlot(intentRequest.sessionAttributes, intentRequest.currentIntent.name, slots, validationResult.violatedSlot, validationResult.message));

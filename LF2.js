@@ -2,28 +2,65 @@
 
 var AWS = require('aws-sdk');
 var sqs = new AWS.SQS();
-var sns = new AWS.SNS();
+//var sns = new AWS.SNS();
 
 var https = require("https");
 
-function sendTextMessage(text, phone, callback) {
-    // text = "Hello! Here are my Japanese restaurant suggestions for 2 people," + 
-    //        "for today at 7 pm: 1. Sushi Nakazawa, located at 23 Commerce St," +
-    //        "2. Jin Ramen, located at 3183 Broadway, " + 
-    //        "3. Nikko, located at 1280 Amsterdam Ave. Enjoy your meal!";
-    // phone = "+13477614173";
+// function sendTextMessage(text, phone, callback) {
+//     // text = "Hello! Here are my Japanese restaurant suggestions for 2 people," + 
+//     //        "for today at 7 pm: 1. Sushi Nakazawa, located at 23 Commerce St," +
+//     //        "2. Jin Ramen, located at 3183 Broadway, " + 
+//     //        "3. Nikko, located at 1280 Amsterdam Ave. Enjoy your meal!";
+//     // phone = "+13477614173";
 
-    var params = {
-      Message: text, /* required */
-      PhoneNumber: phone,
-      Subject: 'Restaurant suggestions',
-    };
-    sns.publish(params, function(err, data) {
-      if (err) console.log(err, err.stack); // an error occurred
-      else     console.log(data);           // successful response
+//     var params = {
+//       Message: text, /* required */
+//       PhoneNumber: phone,
+//       Subject: 'Restaurant suggestions',
+//     };
+//     sns.publish(params, function(err, data) {
+//       if (err) console.log(err, err.stack); // an error occurred
+//       else     console.log(data);           // successful response
 
-      callback(null, "Send message to user's phone number");
-    });
+//       callback(null, "Send message to user's phone number");
+//     });
+// }
+
+function sendEmailMessage(text, email, callback){
+    // Create sendEmail params 
+var params = {
+  Destination: { /* required */
+    ToAddresses: [
+      email,
+      /* more items */
+    ]
+  },
+  Message: { /* required */
+    Body: { /* required */
+      Text: {
+       Charset: "UTF-8",
+       Data: text
+      }
+     },
+     Subject: {
+      Charset: 'UTF-8',
+      Data: 'Restaurant Suggestions'
+     }
+    },
+  Source: 'qs479@nyu.edu', /* required */
+};       
+
+// Create the promise and SES service object
+var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
+
+// Handle promise's fulfilled/rejected states
+sendPromise.then(
+  function(data) {
+    console.log(data.MessageId);
+  }).catch(
+    function(err) {
+    console.error(err, err.stack);
+  });
 }
 
 function formatText(cuisine, peopleNum, date, time, recommendList) {
@@ -47,7 +84,8 @@ function getSuggestionList(message, callback) {
 
     // console.log(message);
     
-    var phone = "+1" + message.Phone;
+//    var phone = "+1" + message.Phone;
+    var email = message.Email;
     var dict = { location: message.Location.replace(/ /g, "%20"), 
                  categories: message.Cuisine.toLowerCase()+",All",
                  open_at: Math.floor((new Date(message.Date + " " + message.Time)).getTime()/1000),
@@ -94,7 +132,8 @@ function getSuggestionList(message, callback) {
             console.log(result);
             let text = formatText(message.Cuisine, message.PeopleNum, message.Date, message.Time, result);
             console.log(text);
-            sendTextMessage(text, phone, callback);
+//            sendTextMessage(text, phone, callback);
+            sendEmailMessage(text, email, callback);
         });
     });
 }
@@ -135,5 +174,7 @@ function receiveMessage(callback) {
 
 exports.handler = (event, context, callback) => {
 
-    receiveMessage(callback)
+    receiveMessage(callback);
+//    SendEmailMessage("hello", "qs479@nyu.edu", callback);
+    
 };
