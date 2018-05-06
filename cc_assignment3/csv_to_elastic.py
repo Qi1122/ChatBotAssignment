@@ -76,7 +76,7 @@ def getParams():
     params["file_path"] = "./data/FILE_3_prediction_recommend.csv"
     params["elastic_address"] = 'search-recommend-xjclj4cziq5cck27y3rkkvqwee.us-east-1.es.amazonaws.com'
     # search-recommend-xjclj4cziq5cck27y3rkkvqwee.us-east-1.es.amazonaws.com
-    params["json_struct"] = '{"RestaurantID" : "%RestaurantID%", "Cuisine" : "%Cuisine%", "Score" : "%Score%"}'
+    params["json_struct"] = '{"RestaurantID" : "%id%", "Cuisine" : "%cuisine%", "Score" : "%score%"}'
     return params
 
 def execute(file_path, delimiter, elastic_index, json_struct, elastic_type, elastic_address):
@@ -98,6 +98,7 @@ def execute(file_path, delimiter, elastic_index, json_struct, elastic_type, elas
                 for iterator, col in enumerate(row):
                     headers.append(col)
                     headers_position[col] = iterator
+                print(headers)
             elif len(row[0]) == 0: # Empty rows on the end of document
                 print("Found empty rows at the end of document")
                 break
@@ -134,8 +135,8 @@ def execute(file_path, delimiter, elastic_index, json_struct, elastic_type, elas
                        headers=headers, body=to_elastic_string)
     response = connection.getresponse()
     print("Returned status code:", response.status)
-    # body = response.read()
-    # print("Returned body:", body)
+    body = response.read()
+    print("Returned body:", body)
     return
 
 if __name__ == '__main__':

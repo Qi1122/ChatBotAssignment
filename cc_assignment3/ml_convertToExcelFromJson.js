@@ -1,8 +1,8 @@
 const fs = require('fs');
 const readline = require('readline');
 
-const read_file_name = 'data/restaurants.json';
-const write_file_name = 'data/restaurants_full.csv';
+const read_file_name = 'data/restaurants_22.json';
+const write_file_name = 'data/restaurants_22.csv';
 
 getData(read_file_name)
 .then(data => {
